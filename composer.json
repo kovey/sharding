@@ -21,7 +21,7 @@
         "php": ">=8.0",
         "kovey/db": "^1.0",
         "kovey/redis": "^1.0",
-        "kovey/pool": "^1.0"
+        "kovey/connection": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.3"

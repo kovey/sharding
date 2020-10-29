@@ -9,7 +9,7 @@
  * @time 2020-10-22 17:48:03
  *
  */
-namespace Kovey\Db\Sharding;
+namespace Kovey\Sharding\Sharding;
 
 use PHPUnit\Framework\TestCase;
 use Kovey\Db\Mysql;

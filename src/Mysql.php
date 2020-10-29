@@ -44,11 +44,11 @@ class Mysql implements DbInterface
      *
      * @param int $dbCount
      *
-     * @param callable $fun
+     * @param callable $initPool
      *
      * @return Mysql
 	 */
-    public function __construct(Array $shardingKeys, int $dbCount, callable $fun)
+    public function __construct(Array $shardingKeys, int $dbCount, callable $initPool)
     {
         $this->database = new Database($dbCount);
         $this->connections = array();
@@ -58,7 +58,7 @@ class Mysql implements DbInterface
                 continue;
             }
 
-            $pool = call_user_func($fun, $partition);
+            $pool = call_user_func($initPool, $partition);
             if (!$pool instanceof Pool) {
                 throw new DbException('pool is not instanceof Pool', 1011);
             }
@@ -93,7 +93,7 @@ class Mysql implements DbInterface
             throw new DbException("connection of $shardingKey is not exists.", 1009);
         }
 
-        return $this->connections[$shardingKey]->getDatabase();
+        return $this->connections[$shardingKey]->getConnection();
     }
 
 	/**
@@ -107,7 +107,6 @@ class Mysql implements DbInterface
 	 */
     public function query(string $sql, string | int $shardingKey) : Array
     {
-
         return $this->getConnection($shardingKey)->query($sql);
     }
 
@@ -121,12 +120,12 @@ class Mysql implements DbInterface
     public function commit() : bool
     {
         foreach ($this->connections as $connection) {
-            if (!$connection->inTransaction()) {
+            if (!$connection->getConnection()->inTransaction()) {
                 continue;
             }
 
-            if (!$connection->commit()) {
-                throw new DbException('commit fail: ' . $connection->getError(), 1010);
+            if (!$connection->getConnection()->commit()) {
+                throw new DbException('commit fail: ' . $connection->getConnection()->getError(), 1010);
             }
         }
 
@@ -141,11 +140,11 @@ class Mysql implements DbInterface
     public function beginTransaction() : bool
     {
         foreach ($this->connections as $connection) {
-            if ($connection->inTransaction()) {
+            if ($connection->getConnection()->inTransaction()) {
                 continue;
             }
 
-            if (!$connection->beginTransaction()) {
+            if (!$connection->getConnection()->beginTransaction()) {
                 return false;
             }
         }
@@ -161,11 +160,11 @@ class Mysql implements DbInterface
     public function rollBack() : bool
     {
         foreach ($this->connections as $connection) {
-            if (!$connection->inTransaction()) {
+            if (!$connection->getConnection()->inTransaction()) {
                 continue;
             }
 
-            $connection->rollBack();
+            $connection->getConnection()->rollBack();
         }
 
         return true;

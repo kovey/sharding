@@ -9,11 +9,11 @@
  * @time 2020-10-22 17:48:59
  *
  */
-namespace Kovey\Db\Model\Cases;
+namespace Kovey\Sharding\Model\Cases;
 
-use Kovey\Db\Model\ShardingBase;
+use Kovey\Sharding\Model\Base;
 
-class ShardingTable extends ShardingBase
+class ShardingTable extends Base
 {
     protected string $tableName = 'test';
 }
