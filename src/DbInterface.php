@@ -26,8 +26,10 @@ interface DbInterface
      * @param int $dbCount
      *
      * @param callable $initPool
+     *
+     * @param Array $shardingKeys
 	 */
-	public function __construct(int $dbCount, callable | Array $initPool);
+	public function __construct(int $dbCount, callable | Array $initPool, Array $shardingKeys = array());
 
 	/**
 	 * @description query

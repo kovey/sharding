@@ -22,9 +22,11 @@ use Kovey\Sharding\Model\Cases\ShardingTable;
 
 class BaseTest extends TestCase
 {
-    protected function setUp() : void
+    protected static ?Mysql $mysql;
+
+    public static function setUpBeforeClass() : void
     {
-        $this->mysql = new Mysql(2, function ($partition) {
+        self::$mysql = new Mysql(2, function ($partition) {
             $pool = new PM(array(
                 'min' => 2,
                 'max' => 4
@@ -41,17 +43,20 @@ class BaseTest extends TestCase
             $pool->init();
             return new Pool($pool);
         });
-        $this->mysql->addShardingKey(10000)
+        self::$mysql->addShardingKey(10000)
              ->addShardingKey('kovey');
+    }
 
-        $this->mysql->exec('create table test_0 (id int AUTO_INCREMENT, number int, PRIMARY KEY (id))', 10000);
-        $this->mysql->exec('create table test_1 (id int AUTO_INCREMENT, number int, PRIMARY KEY (id))', 'kovey');
+    protected function setUp() : void
+    {
+        self::$mysql->exec('create table test_0 (id int AUTO_INCREMENT, number int, PRIMARY KEY (id))', 10000);
+        self::$mysql->exec('create table test_1 (id int AUTO_INCREMENT, number int, PRIMARY KEY (id))', 'kovey');
     }
 
     public function testInsert()
     {
         $table = new ShardingTable();
-        $table->database = $this->mysql;
+        $table->database = self::$mysql;
         $this->assertEquals(1, $table->insert(array(
             'number' => 1
         ), 10000));
@@ -66,7 +71,7 @@ class BaseTest extends TestCase
     public function testUpdate()
     {
         $table = new ShardingTable();
-        $table->database = $this->mysql;
+        $table->database = self::$mysql;
         $table->insert(array(
             'number' => 1
         ), 10000);
@@ -91,7 +96,7 @@ class BaseTest extends TestCase
     public function testDelete()
     {
         $table = new ShardingTable();
-        $table->database = $this->mysql;
+        $table->database = self::$mysql;
         $this->assertEquals(1, $table->insert(array(
             'number' => 1
         ), 10000));
@@ -114,7 +119,7 @@ class BaseTest extends TestCase
     public function testFetchRow()
     {
         $table = new ShardingTable();
-        $table->database = $this->mysql;
+        $table->database = self::$mysql;
         $table->insert(array(
             'number' => 1
         ), 10000);
@@ -131,7 +136,7 @@ class BaseTest extends TestCase
     public function testFetchAll()
     {
         $table = new ShardingTable();
-        $table->database = $this->mysql;
+        $table->database = self::$mysql;
         $table->insert(array(
             'number' => 1
         ), 10000);
@@ -160,7 +165,7 @@ class BaseTest extends TestCase
     public function testBatchInsert()
     {
         $table = new ShardingTable();
-        $table->database = $this->mysql;
+        $table->database = self::$mysql;
         $this->assertEquals(2, $table->batchInsert(array(
             array(
                 'number' => 1
@@ -190,7 +195,12 @@ class BaseTest extends TestCase
 
     protected function tearDown() : void
     {
-        $this->mysql->exec('drop table test_0', 10000);
-        $this->mysql->exec('drop table test_1', 'kovey');
+        self::$mysql->exec('drop table test_0', 10000);
+        self::$mysql->exec('drop table test_1', 'kovey');
+    }
+
+    public static function tearDownAfterClass() : void
+    {
+        self::$mysql = null;
     }
 }

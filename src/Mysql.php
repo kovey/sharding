@@ -51,7 +51,7 @@ class Mysql implements DbInterface
      *
      * @return Mysql
 	 */
-    public function __construct(int $dbCount, callable | Array $initPool)
+    public function __construct(int $dbCount, callable | Array $initPool, Array $shardingKeys = array())
     {
         if (!is_callable($initPool)) {
             throw new DbException('initPool event is not callable', 1014);
@@ -60,6 +60,9 @@ class Mysql implements DbInterface
         $this->initPool = $initPool;
         $this->database = new Database($dbCount);
         $this->connections = array();
+        foreach ($shardingKeys as $key) {
+            $this->addShardingKey($key);
+        }
     }
 
     /**
