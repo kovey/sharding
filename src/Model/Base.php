@@ -15,7 +15,6 @@ use Kovey\Db\Sql\Insert;
 use Kovey\Db\Sql\Update;
 use Kovey\Db\Sql\Delete;
 use Kovey\Db\Sql\BatchInsert;
-use Kovey\Sharding\DbInterface;
 use Kovey\Db\Exception\DbException;
 
 abstract class Base
@@ -32,22 +31,20 @@ abstract class Base
 	 *
 	 * @param Array $data
 	 *
-	 * @param DbInterface $db
-     *
      * @param string | int $shardingKey
 	 *
 	 * @return int
 	 *
 	 * @throws DbException
 	 */
-	public function insert(Array $data, DbInterface $db, string | int $shardingKey) : int
+	public function insert(Array $data, string | int $shardingKey) : int
 	{
-		$insert = new Insert($this->getTableName($db->getShardingKey($shardingKey)));
+		$insert = new Insert($this->getTableName($this->database->getShardingKey($shardingKey)));
 		foreach ($data as $key => $val) {
 			$insert->$key = $val;
 		}
 
-		return $db->insert($insert, $shardingKey);
+		return $this->database->insert($insert, $shardingKey);
 	}
 
 	/**
@@ -57,23 +54,21 @@ abstract class Base
 	 *
 	 * @param Array $condition
 	 *
-	 * @param DbInterface $db
-     *
      * @param string | int $shardingKey
 	 *
 	 * @return int
 	 *
 	 * @throws DbException
 	 */
-	public function update(Array $data, Array $condition, DbInterface $db, string | int $shardingKey) : int
+	public function update(Array $data, Array $condition, string | int $shardingKey) : int
 	{
-		$update = new Update($this->getTableName($db->getShardingKey($shardingKey)));
+		$update = new Update($this->getTableName($this->database->getShardingKey($shardingKey)));
 		foreach ($data as $key => $val) {
 			$update->$key = $val;
 		}
 
 		$update->where($condition);
-		return $db->update($update, $shardingKey);
+		return $this->database->update($update, $shardingKey);
 	}
 
 	/**
@@ -83,21 +78,19 @@ abstract class Base
 	 *
 	 * @param Array $columns
 	 *
-	 * @param DbInterface $db
-     *
      * @param string | int $shardingKey
 	 *
 	 * @return Array | bool
 	 *
 	 * @throws DbException
 	 */
-	public function fetchRow(Array $condition, Array $columns, DbInterface $db, string | int $shardingKey) : Array | bool
+	public function fetchRow(Array $condition, Array $columns, string | int $shardingKey) : Array | bool
 	{
 		if (empty($columns)) {
 			throw new DbException('selected columns is empty.', 1004); 
 		}
 
-		return $db->fetchRow($this->getTableName($db->getShardingKey($shardingKey)), $condition, $columns, $shardingKey);
+		return $this->database->fetchRow($this->getTableName($this->database->getShardingKey($shardingKey)), $condition, $columns, $shardingKey);
 	}
 
 	/**
@@ -107,21 +100,19 @@ abstract class Base
 	 *
 	 * @param Array  $columns
 	 *
-	 * @param DbInterface $db
-     *
      * @param string | int $shardingKey
 	 *
 	 * @return Array | false
 	 *
 	 * @throws DbException
 	 */
-	public function fetchAll(Array $condition, Array $columns, DbInterface $db, string | int $shardingKey) : Array | bool
+	public function fetchAll(Array $condition, Array $columns, string | int $shardingKey) : Array | bool
 	{
 		if (empty($columns)) {
 			throw new DbException('selected columns is empty.', 1005); 
 		}
 
-		return $db->fetchAll($this->getTableName($db->getShardingKey($shardingKey)), $condition, $columns, $shardingKey);
+		return $this->database->fetchAll($this->getTableName($this->database->getShardingKey($shardingKey)), $condition, $columns, $shardingKey);
 	}
 
 	/**
@@ -129,21 +120,19 @@ abstract class Base
 	 *
 	 * @param Array $rows
 	 *
-	 * @param DbInterface $db
-     *
      * @param string | int $shardingKey
 	 *
 	 * @return int
 	 *
 	 * @throws DbException
 	 */
-	public function batchInsert(Array $rows, DbInterface $db, string | int $shardingKey) : int
+	public function batchInsert(Array $rows, string | int $shardingKey) : int
 	{
 		if (empty($rows)) {
 			throw new DbException('rows is empty.', 1006);
 		}
 
-        $sk = $db->getShardingKey($shardingKey);
+        $sk = $this->database->getShardingKey($shardingKey);
 		$batchInsert = new BatchInsert($this->getTableName($sk));
 		foreach ($rows as $row) {
 			$insert = new Insert($this->getTableName($sk));
@@ -154,7 +143,7 @@ abstract class Base
 			$batchInsert->add($insert);
 		}
 
-		return $db->batchInsert($batchInsert, $shardingKey);
+		return $this->database->batchInsert($batchInsert, $shardingKey);
 	}
 
 	/**
@@ -164,19 +153,17 @@ abstract class Base
 	 *
 	 * @param Array $condition
 	 *
-	 * @param DbInterface $db
-     *
      * @param string | int $shardingKey
 	 *
 	 * @return int
 	 *
 	 * @throws DbException
 	 */
-	public function delete(Array $condition, DbInterface $db, string | int $shardingKey) : int
+	public function delete(Array $condition,  string | int $shardingKey) : int
 	{
-		$delete = new Delete($this->getTableName($db->getShardingKey($shardingKey)));
+		$delete = new Delete($this->getTableName($this->database->getShardingKey($shardingKey)));
 		$delete->where($condition);
-		return $db->delete($delete, $shardingKey);
+		return $this->database->delete($delete, $shardingKey);
 	}
 
     /**

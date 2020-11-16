@@ -24,7 +24,7 @@ class BaseTest extends TestCase
 {
     protected function setUp() : void
     {
-        $this->mysql = new Mysql(array(10000, 'kovey'), 2, function ($partition) {
+        $this->mysql = new Mysql(2, function ($partition) {
             $pool = new PM(array(
                 'min' => 2,
                 'max' => 4
@@ -41,6 +41,9 @@ class BaseTest extends TestCase
             $pool->init();
             return new Pool($pool);
         });
+        $this->mysql->addShardingKey(10000)
+             ->addShardingKey('kovey');
+
         $this->mysql->exec('create table test_0 (id int AUTO_INCREMENT, number int, PRIMARY KEY (id))', 10000);
         $this->mysql->exec('create table test_1 (id int AUTO_INCREMENT, number int, PRIMARY KEY (id))', 'kovey');
     }
@@ -48,110 +51,116 @@ class BaseTest extends TestCase
     public function testInsert()
     {
         $table = new ShardingTable();
+        $table->database = $this->mysql;
         $this->assertEquals(1, $table->insert(array(
             'number' => 1
-        ), $this->mysql, 10000));
-        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 10000));
+        ), 10000));
+        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), 10000));
 
         $this->assertEquals(1, $table->insert(array(
             'number' => 1
-        ), $this->mysql, 'kovey'));
-        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 'kovey'));
+        ), 'kovey'));
+        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), 'kovey'));
     }
 
     public function testUpdate()
     {
         $table = new ShardingTable();
+        $table->database = $this->mysql;
         $table->insert(array(
             'number' => 1
-        ), $this->mysql, 10000);
+        ), 10000);
 
         $this->assertEquals(1, $table->update(array(
             'number' => 3
-        ), array('id' => 1), $this->mysql, 10000));
+        ), array('id' => 1), 10000));
 
-        $this->assertEquals(array('id' => 1, 'number' => 3), $table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 10000));
+        $this->assertEquals(array('id' => 1, 'number' => 3), $table->fetchRow(array('id' => 1), array('id', 'number'), 10000));
 
         $table->insert(array(
             'number' => 1
-        ), $this->mysql, 'kovey');
+        ), 'kovey');
 
         $this->assertEquals(1, $table->update(array(
             'number' => 3
-        ), array('id' => 1), $this->mysql, 'kovey'));
+        ), array('id' => 1), 'kovey'));
 
-        $this->assertEquals(array('id' => 1, 'number' => 3), $table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 'kovey'));
+        $this->assertEquals(array('id' => 1, 'number' => 3), $table->fetchRow(array('id' => 1), array('id', 'number'), 'kovey'));
     }
 
     public function testDelete()
     {
         $table = new ShardingTable();
+        $table->database = $this->mysql;
         $this->assertEquals(1, $table->insert(array(
             'number' => 1
-        ), $this->mysql, 10000));
+        ), 10000));
 
-        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 10000));
+        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), 10000));
 
-        $this->assertEquals(1, $table->delete(array('id' => 1), $this->mysql, 10000));
-        $this->assertFalse($table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 10000));
+        $this->assertEquals(1, $table->delete(array('id' => 1), 10000));
+        $this->assertFalse($table->fetchRow(array('id' => 1), array('id', 'number'), 10000));
 
         $this->assertEquals(1, $table->insert(array(
             'number' => 1
-        ), $this->mysql, 'kovey'));
+        ), 'kovey'));
 
-        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 'kovey'));
+        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), 'kovey'));
 
-        $this->assertEquals(1, $table->delete(array('id' => 1), $this->mysql, 'kovey'));
-        $this->assertFalse($table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 'kovey'));
+        $this->assertEquals(1, $table->delete(array('id' => 1), 'kovey'));
+        $this->assertFalse($table->fetchRow(array('id' => 1), array('id', 'number'), 'kovey'));
     }
 
     public function testFetchRow()
     {
         $table = new ShardingTable();
+        $table->database = $this->mysql;
         $table->insert(array(
             'number' => 1
-        ), $this->mysql, 10000);
+        ), 10000);
 
-        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 10000));
+        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), 10000));
 
         $table->insert(array(
             'number' => 1
-        ), $this->mysql, 'kovey');
+        ), 'kovey');
 
-        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), $this->mysql, 'kovey'));
+        $this->assertEquals(array('id' => 1, 'number' => 1), $table->fetchRow(array('id' => 1), array('id', 'number'), 'kovey'));
     }
 
     public function testFetchAll()
     {
         $table = new ShardingTable();
+        $table->database = $this->mysql;
         $table->insert(array(
             'number' => 1
-        ), $this->mysql, 10000);
+        ), 10000);
         $table->insert(array(
             'number' => 2
-        ), $this->mysql, 10000);
+        ), 10000);
 
         $this->assertEquals(array(
             array('id' => 1, 'number' => 1),
             array('id' => 2, 'number' => 2),
-        ), $table->fetchAll(array(), array('id', 'number'), $this->mysql, 10000));
+        ), $table->fetchAll(array(), array('id', 'number'), 10000));
     
         $table->insert(array(
             'number' => 1
-        ), $this->mysql, 'kovey');
+        ), 'kovey');
         $table->insert(array(
             'number' => 2
-        ), $this->mysql, 'kovey');
+        ), 'kovey');
 
         $this->assertEquals(array(
             array('id' => 1, 'number' => 1),
             array('id' => 2, 'number' => 2),
-        ), $table->fetchAll(array(), array('id', 'number'), $this->mysql, 'kovey'));
+        ), $table->fetchAll(array(), array('id', 'number'), 'kovey'));
     }
 
     public function testBatchInsert()
     {
         $table = new ShardingTable();
+        $table->database = $this->mysql;
         $this->assertEquals(2, $table->batchInsert(array(
             array(
                 'number' => 1
@@ -159,11 +168,11 @@ class BaseTest extends TestCase
             array(
                 'number' => 2
             )
-        ), $this->mysql, 10000));
+        ), 10000));
         $this->assertEquals(array(
             array('id' => 1, 'number' => 1),
             array('id' => 2, 'number' => 2),
-        ), $table->fetchAll(array(), array('id', 'number'), $this->mysql, 10000));
+        ), $table->fetchAll(array(), array('id', 'number'), 10000));
 
         $this->assertEquals(2, $table->batchInsert(array(
             array(
@@ -172,11 +181,11 @@ class BaseTest extends TestCase
             array(
                 'number' => 2
             )
-        ), $this->mysql, 'kovey'));
+        ), 'kovey'));
         $this->assertEquals(array(
             array('id' => 1, 'number' => 1),
             array('id' => 2, 'number' => 2),
-        ), $table->fetchAll(array(), array('id', 'number'), $this->mysql, 'kovey'));
+        ), $table->fetchAll(array(), array('id', 'number'), 'kovey'));
     }
 
     protected function tearDown() : void

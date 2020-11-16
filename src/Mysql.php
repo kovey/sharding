@@ -37,34 +37,29 @@ class Mysql implements DbInterface
      */
     private Array $connections;
 
+    /**
+     * @description init pool event
+     */
+    private $initPool;
+
 	/**
 	 * @description construct
 	 *
-	 * @param Array $shardingKeys
-     *
      * @param int $dbCount
      *
-     * @param callable $initPool
+     * @param callable | Array $initPool
      *
      * @return Mysql
 	 */
-    public function __construct(Array $shardingKeys, int $dbCount, callable $initPool)
+    public function __construct(int $dbCount, callable | Array $initPool)
     {
+        if (!is_callable($initPool)) {
+            throw new DbException('initPool event is not callable', 1014);
+        }
+
+        $this->initPool = $initPool;
         $this->database = new Database($dbCount);
         $this->connections = array();
-        foreach ($shardingKeys as $shardingKey) {
-            $partition = $this->database->getShardingKey($shardingKey);
-            if (isset($this->connections[$partition])) {
-                continue;
-            }
-
-            $pool = call_user_func($initPool, $partition);
-            if (!$pool instanceof Pool) {
-                throw new DbException('pool is not instanceof Pool', 1011);
-            }
-
-            $this->connections[$partition] = $pool;
-        }
     }
 
     /**
@@ -316,5 +311,29 @@ class Mysql implements DbInterface
     public function exec(string $sql, string | int $shardingKey) : int
     {
         return $this->getConnection($shardingKey)->exec($sql);
+    }
+
+    /**
+     * @description add sharding key
+     *
+     * @param string | int $shardingKey
+     *
+     * @return DbInterface
+     *
+     */
+    public function addShardingKey(string | int $shardingKey) : DbInterface
+    {
+        $partition = $this->database->getShardingKey($shardingKey);
+        if (isset($this->connections[$partition])) {
+            return $this;
+        }
+
+        $pool = call_user_func($this->initPool, $partition);
+        if (!$pool instanceof Pool) {
+            throw new DbException('pool is not instanceof Pool', 1011);
+        }
+
+        $this->connections[$partition] = $pool;
+        return $this;
     }
 }

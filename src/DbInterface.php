@@ -23,13 +23,11 @@ interface DbInterface
 	/**
 	 * @description construct
 	 *
-	 * @param Array $shardingKeys
-     *
      * @param int $dbCount
      *
      * @param callable $initPool
 	 */
-	public function __construct(Array $shardingKeys, int $dbCount, callable $initPool);
+	public function __construct(int $dbCount, callable | Array $initPool);
 
 	/**
 	 * @description query
@@ -188,4 +186,14 @@ interface DbInterface
      * @return DbInterface
      */
     public function getConnection(string | int $shardingKey) : DI;
+
+    /**
+     * @description add sharding key
+     *
+     * @param string | int $shardingKey
+     *
+     * @return DbInterface
+     *
+     */
+    public function addShardingKey(string | int $shardingKey) : DbInterface;
 }

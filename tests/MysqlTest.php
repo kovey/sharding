@@ -28,7 +28,7 @@ class MysqlTest extends TestCase
 
     protected function setUp() : void
     {
-        $this->mysql = new Mysql(array(10000, 'kovey'), 2, function ($partition) {
+        $this->mysql = new Mysql(2, function ($partition) {
             $pool = new PM(array(
                 'min' => 2,
                 'max' => 4
@@ -45,6 +45,9 @@ class MysqlTest extends TestCase
             $pool->init();
             return new Pool($pool);
         });
+
+        $this->mysql->addShardingKey(10000)
+             ->addShardingKey('kovey');
         $this->mysql->exec('create table test_0 (id int AUTO_INCREMENT, name varchar(512) NOT NULL DEFAULT \'\', PRIMARY KEY (id))', 10000);
         $this->mysql->exec('create table test_1 (id int AUTO_INCREMENT, name varchar(512) NOT NULL DEFAULT \'\', PRIMARY KEY (id))', 'kovey');
     }
