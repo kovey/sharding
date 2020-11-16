@@ -20,6 +20,7 @@ use Kovey\Db\Sql\Update;
 use Kovey\Db\Sql\Select;
 use Kovey\Db\Sql\Delete;
 use Kovey\Db\Sql\BatchInsert;
+use Kovey\Db\Exception\DbException;
 
 class MysqlTest extends TestCase
 {
@@ -230,7 +231,7 @@ class MysqlTest extends TestCase
 
     public function testTransactionSuccess()
     {
-        $result = $this->mysql->transation(function ($mysql, $params) {
+        $result = $this->mysql->transaction(function ($mysql, $params) {
             $insert = new Insert('test_0');
             $insert->name = 'kovey0';
             $mysql->insert($insert, 10000);
@@ -250,7 +251,8 @@ class MysqlTest extends TestCase
 
     public function testTransactionFailure()
     {
-        $result = $this->mysql->transation(function ($mysql, $params) {
+        $this->expectException(DbException::class);
+        $result = $this->mysql->transaction(function ($mysql, $params) {
             $insert = new Insert('test_0');
             $insert->name = 'kovey0';
             $mysql->insert($insert, 10000);
@@ -262,7 +264,6 @@ class MysqlTest extends TestCase
             $this->assertEquals('aaaa', $params);
         }, 'aaaa');
 
-        $this->assertFalse($result);
         $this->assertFalse($this->mysql->fetchRow('test_0', array('id' => 1), array('id', 'name'), 10000));
         $this->assertFalse($this->mysql->fetchRow('test_1', array('id' => 1), array('id', 'name'), 'kovey'));
     }

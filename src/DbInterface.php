@@ -158,7 +158,7 @@ interface DbInterface
      *
      * @throws DbException
      */
-    public function transation(callable $fun, $finally, ...$params) : bool;
+    public function transaction(callable $fun, $finally, ...$params) : bool;
 
     /**
      * @description exec sql

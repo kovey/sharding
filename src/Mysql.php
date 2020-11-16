@@ -286,7 +286,7 @@ class Mysql implements DbInterface
      *
      * @throws DbException
      */
-    public function transation(callable $fun, $finally, ...$params) : bool
+    public function transaction(callable $fun, $finally, ...$params) : bool
     {
         $this->beginTransaction();
         try {
@@ -294,7 +294,7 @@ class Mysql implements DbInterface
             $this->commit();
         } catch (DbException $e) {
             $this->rollBack();
-            return false;
+            throw $e;
         } finally {
             if (is_callable($finally)) {
                 call_user_func($finally, $this, ...$params);
