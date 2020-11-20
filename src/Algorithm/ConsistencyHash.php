@@ -65,7 +65,7 @@ class ConsistencyHash
     {
         $this->nodes[] = $node;
 
-        for( $i = 0; $i < $this->vNotesCount; $i++ ){
+        for( $i = 0; $i < $this->vNotesCount; $i ++ ){
             $vHashKey = sprintf("%u", crc32($node . $i));
             $this->vNotes[$vHashKey] = $node;
         }
