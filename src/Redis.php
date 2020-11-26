@@ -36,15 +36,15 @@ class Redis implements RedisInterface
      */
     private $initPool;
 
-	/**
-	 * @description construct
-	 *
+    /**
+     * @description construct
+     *
      * @param int $redisCount
      *
      * @param callable | Array $initPool
      *
      * @return Mysql
-	 */
+     */
     public function __construct(int $redisCount, callable | Array $initPool, Array $shardingKeys = array())
     {
         if (!is_callable($initPool)) {

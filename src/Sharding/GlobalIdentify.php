@@ -17,13 +17,13 @@ use Kovey\Db\Mysql;
 
 class GlobalIdentify
 {
-	/**
-	 * @description cache
-	 *
-	 * @var string
-	 *
-	 */
-	const GLOBAL_IDENTIFY_KEY = 'global_indentify_key_';
+    /**
+     * @description cache
+     *
+     * @var string
+     *
+     */
+    const GLOBAL_IDENTIFY_KEY = 'global_indentify_key_';
 
     /**
      * @description locker
@@ -32,115 +32,115 @@ class GlobalIdentify
      */
     const GLOBAL_LOCKER_KEY = 'global_locker_key_';
 
-	/**
-	 * @description redis
-	 *
-	 * @var Kovey\Redis\Redis
-	 */
-	private Redis $redis;
+    /**
+     * @description redis
+     *
+     * @var Kovey\Redis\Redis
+     */
+    private Redis $redis;
 
-	/**
-	 * @description mysql
-	 *
-	 * @var Kovey\Db\Mysql
-	 */
-	private Mysql $mysql;
+    /**
+     * @description mysql
+     *
+     * @var Kovey\Db\Mysql
+     */
+    private Mysql $mysql;
 
-	/**
-	 * @description table
-	 *
-	 * @var string
-	 */
-	private string $identifyTable;
+    /**
+     * @description table
+     *
+     * @var string
+     */
+    private string $identifyTable;
 
-	/**
-	 * @description field
-	 *
-	 * @var string
-	 */
-	private string $identifyField;
+    /**
+     * @description field
+     *
+     * @var string
+     */
+    private string $identifyField;
 
-	/**
-	 * @description primary key
-	 *
-	 * @var string
-	 */
-	private string $primaryField;
+    /**
+     * @description primary key
+     *
+     * @var string
+     */
+    private string $primaryField;
 
-	/**
-	 * @description construct
-	 *
-	 * @param Kovey\Redis\Redis\Redis $redis
-	 *
-	 * @param Kovey\Db\Mysql $mysql
-	 *
-	 * @return GlobalIdentify
-	 */
-	public function __construct(Redis $redis, Mysql $mysql)
-	{
-		$this->redis = $redis;
-		$this->mysql = $mysql;
-	}
+    /**
+     * @description construct
+     *
+     * @param Kovey\Redis\Redis\Redis $redis
+     *
+     * @param Kovey\Db\Mysql $mysql
+     *
+     * @return GlobalIdentify
+     */
+    public function __construct(Redis $redis, Mysql $mysql)
+    {
+        $this->redis = $redis;
+        $this->mysql = $mysql;
+    }
 
-	/**
-	 * @description set table info
-	 *
-	 * @param string $identifyTable
-	 *
-	 * @param string $identifyField
-	 *
-	 * @param string $primaryField
-	 *
-	 * @return null
-	 */
-	public function setTableInfo(string $identifyTable, string $identifyField, string $primaryField = 'id')
-	{
-		$this->identifyField = $identifyField;
-		$this->identifyTable = $identifyTable;
-		$this->primaryField = $primaryField;
-	}
+    /**
+     * @description set table info
+     *
+     * @param string $identifyTable
+     *
+     * @param string $identifyField
+     *
+     * @param string $primaryField
+     *
+     * @return null
+     */
+    public function setTableInfo(string $identifyTable, string $identifyField, string $primaryField = 'id')
+    {
+        $this->identifyField = $identifyField;
+        $this->identifyTable = $identifyTable;
+        $this->primaryField = $primaryField;
+    }
 
-	/**
-	 * @description get global indetify
-	 *
-	 * @return int
-	 */
-	public function getGlobalIdentify() : int
-	{
-		$id = $this->redis->rPop(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable);
-		if (!$id) {
+    /**
+     * @description get global indetify
+     *
+     * @return int
+     */
+    public function getGlobalIdentify() : int
+    {
+        $id = $this->redis->rPop(self::GLOBAL_IDENTIFY_KEY . $this->identifyTable);
+        if (!$id) {
             $id = $this->giveIdentifiesAgian();
-		}
+        }
 
-		return $id;
-	}
+        return $id;
+    }
 
-	/**
-	 * @description give
-	 *
-	 * @return bool | int
-	 */
-	private function giveIdentifiesAgian() : bool | int
-	{
+    /**
+     * @description give
+     *
+     * @return bool | int
+     */
+    private function giveIdentifiesAgian() : bool | int
+    {
         if (!$this->lock()) {
             return false;
         }
 
-		try {
+        try {
             $row = $this->mysql->fetchRow($this->identifyTable, array($this->primaryField => 1), array($this->identifyField));
             if (!$row) {
                 return false;
             }
 
-			$up = new Update($this->identifyTable);
-			$up->where(array(
-				$this->primaryField => 1,
-				$this->identifyField => $row[$this->identifyField]
-			))
-			->addSelf($this->identifyField, 2000);
-			$this->mysql->update($up);
-		} catch (\Exception $e) {
-			return false;
+            $up = new Update($this->identifyTable);
+            $up->where(array(
+                $this->primaryField => 1,
+                $this->identifyField => $row[$this->identifyField]
+            ))
+            ->addSelf($this->identifyField, 2000);
+            $this->mysql->update($up);
+        } catch (\Exception $e) {
+            return false;
         } finally {
             $this->unlock();
         }
@@ -162,8 +162,8 @@ class GlobalIdentify
             }
         }, $id);
 
-		return $id;
-	}
+        return $id;
+    }
 
     /**
      * @description lock

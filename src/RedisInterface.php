@@ -13,16 +13,16 @@ namespace Kovey\Sharding;
 
 interface RedisInterface
 {
-	/**
-	 * @description construct
-	 *
+    /**
+     * @description construct
+     *
      * @param int $redisCount
      *
      * @param callable $initPool
      *
      * @param Array $shardingKeys
-	 */
-	public function __construct(int $redisCount, callable | Array $initPool, Array $shardingKeys = array());
+     */
+    public function __construct(int $redisCount, callable | Array $initPool, Array $shardingKeys = array());
 
     /**
      * @description get sharding key

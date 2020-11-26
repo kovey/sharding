@@ -42,15 +42,15 @@ class Mysql implements DbInterface
      */
     private $initPool;
 
-	/**
-	 * @description construct
-	 *
+    /**
+     * @description construct
+     *
      * @param int $dbCount
      *
      * @param callable | Array $initPool
      *
      * @return Mysql
-	 */
+     */
     public function __construct(int $dbCount, callable | Array $initPool, Array $shardingKeys = array())
     {
         if (!is_callable($initPool)) {
@@ -94,27 +94,27 @@ class Mysql implements DbInterface
         return $this->connections[$shardingKey]->getConnection();
     }
 
-	/**
-	 * @description query
+    /**
+     * @description query
      *
      * @param string $sql
      *
      * @param string | int $shardingKey
-	 *
-	 * @return Array
-	 */
+     *
+     * @return Array
+     */
     public function query(string $sql, string | int $shardingKey) : Array
     {
         return $this->getConnection($shardingKey)->query($sql);
     }
 
-	/**
-	 * @description commit transation
-	 *
-	 * @return bool
+    /**
+     * @description commit transation
+     *
+     * @return bool
      *
      * @throws DbException
-	 */
+     */
     public function commit() : bool
     {
         foreach ($this->connections as $connection) {
@@ -130,11 +130,11 @@ class Mysql implements DbInterface
         return true;
     }
 
-	/**
-	 * @description open transation
-	 *
-	 * @return bool
-	 */
+    /**
+     * @description open transation
+     *
+     * @return bool
+     */
     public function beginTransaction() : bool
     {
         foreach ($this->connections as $connection) {
@@ -150,11 +150,11 @@ class Mysql implements DbInterface
         return true;
     }
 
-	/**
-	 * @description cancel transation
-	 *
-	 * @return bool
-	 */
+    /**
+     * @description cancel transation
+     *
+     * @return bool
+     */
     public function rollBack() : bool
     {
         foreach ($this->connections as $connection) {
@@ -168,75 +168,75 @@ class Mysql implements DbInterface
         return true;
     }
 
-	/**
-	 * @description fetch row
-	 *
-	 * @param string $table
-	 *
-	 * @param Array $condition
-	 *
-	 * @param Array $columns
-	 *
-	 * @return Array | bool
-	 *
-	 * @throws Exception
-	 */
+    /**
+     * @description fetch row
+     *
+     * @param string $table
+     *
+     * @param Array $condition
+     *
+     * @param Array $columns
+     *
+     * @return Array | bool
+     *
+     * @throws Exception
+     */
     public function fetchRow(string $table, Array $condition, Array $columns, string | int $shardingKey) : Array | bool
     {
         return $this->getConnection($shardingKey)->fetchRow($table, $condition, $columns);
     }
 
-	/**
-	 * @description fetch all rows
-	 *
-	 * @param string $table
-	 *
-	 * @param Array $condition
-	 *
-	 * @param Array $columns
-	 *
-	 * @return Array
-	 *
-	 * @throws Exception
-	 */
+    /**
+     * @description fetch all rows
+     *
+     * @param string $table
+     *
+     * @param Array $condition
+     *
+     * @param Array $columns
+     *
+     * @return Array
+     *
+     * @throws Exception
+     */
     public function fetchAll(string $table, Array $condition = array(), Array $columns, string | int $shardingKey) : array
     {
         return $this->getConnection($shardingKey)->fetchAll($table, $condition, $columns);
     }
 
-	/**
-	 * @description execute update sql
-	 *
-	 * @param Update $update
-	 *
-	 * @return int
-	 */
+    /**
+     * @description execute update sql
+     *
+     * @param Update $update
+     *
+     * @return int
+     */
     public function update(Update $update, string | int $shardingKey) : int
     {
         return $this->getConnection($shardingKey)->update($update);
     }
 
-	/**
-	 * @description execute insert sql
-	 *
-	 * @param Insert $insert
-	 *
-	 * @return int
-	 */
+    /**
+     * @description execute insert sql
+     *
+     * @param Insert $insert
+     *
+     * @return int
+     */
     public function insert(Insert $insert, string | int $shardingKey) : int
     {
         return $this->getConnection($shardingKey)->insert($insert);
     }
 
-	/**
-	 * @description execute select sql
-	 *
-	 * @param Select $select
-	 *
-	 * @param int $type
-	 *
-	 * @return Array | bool
-	 */
+    /**
+     * @description execute select sql
+     *
+     * @param Select $select
+     *
+     * @param int $type
+     *
+     * @return Array | bool
+     */
     public function select(Select $select, string | int $shardingKey, int $type = Select::ALL)
     {
         return $this->getConnection($shardingKey)->select($select, $type);
@@ -257,15 +257,15 @@ class Mysql implements DbInterface
         return $this->getConnection($shardingKey)->batchInsert($batchInsert);
     }
 
-	/**
-	 * @description 删除
-	 *
-	 * @param Delete $delete
-	 *
+    /**
+     * @description 删除
+     *
+     * @param Delete $delete
+     *
      * @return bool
      *
      * @throws Exception
-	 */
+     */
     public function delete(Delete $delete, string | int $shardingKey) : int
     {
         return $this->getConnection($shardingKey)->delete($delete);
