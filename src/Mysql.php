@@ -16,6 +16,7 @@ use Kovey\Db\Sql\Insert;
 use Kovey\Db\Sql\Select;
 use Kovey\Db\Sql\Delete;
 use Kovey\Db\Sql\BatchInsert;
+use Kovey\Db\Sql\Where;
 use Kovey\Sharding\Sharding\Database;
 use Kovey\Db\Exception\DbException;
 use Kovey\Db\DbInterface as DI;
@@ -181,7 +182,7 @@ class Mysql implements DbInterface
      *
      * @throws Exception
      */
-    public function fetchRow(string $table, Array $condition, Array $columns, string | int $shardingKey) : Array | bool
+    public function fetchRow(string $table, Array | Where $condition, Array $columns, string | int $shardingKey) : Array | bool
     {
         return $this->getConnection($shardingKey)->fetchRow($table, $condition, $columns);
     }
@@ -199,7 +200,7 @@ class Mysql implements DbInterface
      *
      * @throws Exception
      */
-    public function fetchAll(string $table, Array $condition = array(), Array $columns, string | int $shardingKey) : array
+    public function fetchAll(string $table, Array | Where $condition, Array $columns, string | int $shardingKey) : array
     {
         return $this->getConnection($shardingKey)->fetchAll($table, $condition, $columns);
     }

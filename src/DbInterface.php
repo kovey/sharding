@@ -16,6 +16,7 @@ use Kovey\Db\Sql\Insert;
 use Kovey\Db\Sql\Select;
 use Kovey\Db\Sql\Delete;
 use Kovey\Db\Sql\BatchInsert;
+use Kovey\Db\Sql\Where;
 use Kovey\Db\DbInterface as DI;
 
 interface DbInterface
@@ -76,7 +77,7 @@ interface DbInterface
      *
      * @throws Exception
      */
-    public function fetchRow(string $table, Array $condition, Array $columns, string | int $shardingKey) : Array | bool;
+    public function fetchRow(string $table, Array | Where $condition, Array $columns, string | int $shardingKey) : Array | bool;
 
     /**
      * @description fetch all rows
@@ -91,7 +92,7 @@ interface DbInterface
      *
      * @throws Exception
      */
-    public function fetchAll(string $table, Array $condition = array(), Array $columns, string | int $shardingKey) : array;
+    public function fetchAll(string $table, Array | Where $condition, Array $columns, string | int $shardingKey) : array;
 
     /**
      * @description execute update sql

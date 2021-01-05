@@ -15,6 +15,7 @@ use Kovey\Db\Sql\Insert;
 use Kovey\Db\Sql\Update;
 use Kovey\Db\Sql\Delete;
 use Kovey\Db\Sql\BatchInsert;
+use Kovey\Db\Sql\Where;
 use Kovey\Db\Exception\DbException;
 
 abstract class Base
@@ -60,7 +61,7 @@ abstract class Base
      *
      * @throws DbException
      */
-    public function update(Array $data, Array $condition, string | int $shardingKey) : int
+    public function update(Array $data, Array | Where $condition, string | int $shardingKey) : int
     {
         $update = new Update($this->getTableName($this->database->getShardingKey($shardingKey)));
         foreach ($data as $key => $val) {
@@ -84,7 +85,7 @@ abstract class Base
      *
      * @throws DbException
      */
-    public function fetchRow(Array $condition, Array $columns, string | int $shardingKey) : Array | bool
+    public function fetchRow(Array | Where $condition, Array $columns, string | int $shardingKey) : Array | bool
     {
         if (empty($columns)) {
             throw new DbException('selected columns is empty.', 1004); 
@@ -106,7 +107,7 @@ abstract class Base
      *
      * @throws DbException
      */
-    public function fetchAll(Array $condition, Array $columns, string | int $shardingKey) : Array | bool
+    public function fetchAll(Array | Where $condition, Array $columns, string | int $shardingKey) : Array | bool
     {
         if (empty($columns)) {
             throw new DbException('selected columns is empty.', 1005); 
@@ -159,7 +160,7 @@ abstract class Base
      *
      * @throws DbException
      */
-    public function delete(Array $condition,  string | int $shardingKey) : int
+    public function delete(Array | Where $condition,  string | int $shardingKey) : int
     {
         $delete = new Delete($this->getTableName($this->database->getShardingKey($shardingKey)));
         $delete->where($condition);
