@@ -144,6 +144,7 @@ class Mysql implements DbInterface
             }
 
             if (!$connection->getConnection()->beginTransaction()) {
+                $this->rollBack();
                 return false;
             }
         }
