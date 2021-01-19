@@ -93,11 +93,13 @@ class GlobalIdentify
      *
      * @return null
      */
-    public function setTableInfo(string $identifyTable, string $identifyField, string $primaryField = 'id')
+    public function setTableInfo(string $identifyTable, string $identifyField, string $primaryField = 'id') : GlobalIdentify
     {
         $this->identifyField = $identifyField;
         $this->identifyTable = $identifyTable;
         $this->primaryField = $primaryField;
+
+        return $this;
     }
 
     /**

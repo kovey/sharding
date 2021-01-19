@@ -40,7 +40,7 @@ class ConsistencyHash
      *
      * @var int
      */
-    protected $vNotesCount;
+    protected int $vNotesCount;
 
     /**
      * @description construct

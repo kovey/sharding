@@ -41,7 +41,7 @@ class Mysql implements DbInterface
     /**
      * @description init pool event
      */
-    private $initPool;
+    private mixed $initPool;
 
     /**
      * @description construct

@@ -34,7 +34,7 @@ class Redis implements RedisInterface
     /**
      * @description init pool event
      */
-    private $initPool;
+    private mixed $initPool;
 
     /**
      * @description construct
@@ -116,7 +116,7 @@ class Redis implements RedisInterface
         return $this->connections[$shardingKey]->getConnection();
     }
 
-    public function __call(string $method, Array $params)
+    public function __call(string $method, Array $params) : mixed
     {
         if (empty($params)) {
             throw new \RuntimeException('params is empty.');
