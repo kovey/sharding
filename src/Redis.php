@@ -14,8 +14,9 @@ namespace Kovey\Sharding;
 use Kovey\Sharding\Algorithm\ConsistencyHash;
 use Kovey\Connection\Pool;
 use Kovey\Redis\RedisInterface as RI;
+use Kovey\Connection\ManualCollectInterface;
 
-class Redis implements RedisInterface
+class Redis implements RedisInterface, ManualCollectInterface
 {
     /**
      * @description data base
@@ -123,5 +124,16 @@ class Redis implements RedisInterface
         }
 
         return $this->getConnection($params[0])->$method(...$params);
+    }
+
+    public function collect() : void
+    {
+        foreach ($this->connections as $pool) {
+            if (!$pool instanceof ManualCollectInterface) {
+                continue;
+            }
+
+            $pool->collect();
+        }
     }
 }

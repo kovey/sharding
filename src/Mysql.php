@@ -21,8 +21,9 @@ use Kovey\Sharding\Sharding\Database;
 use Kovey\Db\Exception\DbException;
 use Kovey\Db\DbInterface as DI;
 use Kovey\Connection\Pool;
+use Kovey\Connection\ManualCollectInterface;
 
-class Mysql implements DbInterface
+class Mysql implements DbInterface, ManualCollectInterface
 {
     /**
      * @description data base
@@ -286,7 +287,7 @@ class Mysql implements DbInterface
      *
      * @throws DbException
      */
-    public function transaction(callable $fun, $finally, ...$params) : bool
+    public function transaction(callable $fun, mixed $finally, mixed ...$params) : bool
     {
         $this->beginTransaction();
         try {
@@ -340,5 +341,16 @@ class Mysql implements DbInterface
 
         $this->connections[$partition] = $pool;
         return $this;
+    }
+
+    public function collect() : void
+    {
+        foreach ($this->connections as $pool) {
+            if (!$pool instanceof ManualCollectInterface) {
+                continue;
+            }
+
+            $pool->collect();
+        }
     }
 }
