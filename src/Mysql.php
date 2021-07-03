@@ -339,6 +339,10 @@ class Mysql implements DbInterface, ManualCollectInterface
             throw new DbException('pool is not instanceof Pool', 1011);
         }
 
+        $pool->traceId = $this->traceId ?? '';
+        $pool->spanId = $this->spanId ?? '';
+        $pool->initConnection();
+
         $this->connections[$partition] = $pool;
         return $this;
     }
