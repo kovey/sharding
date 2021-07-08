@@ -182,15 +182,6 @@ interface DbInterface
     public function getShardingKey(string | int $shardingKey) : int;
 
     /**
-     * @description get connection
-     *
-     * @param string | int $shardingKey
-     *
-     * @return DbInterface
-     */
-    public function getConnection(string | int $shardingKey) : DI;
-
-    /**
      * @description add sharding key
      *
      * @param string | int $shardingKey

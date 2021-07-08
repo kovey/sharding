@@ -12,30 +12,15 @@
 namespace Kovey\Sharding;
 
 use Kovey\Sharding\Algorithm\ConsistencyHash;
-use Kovey\Connection\Pool;
-use Kovey\Redis\RedisInterface as RI;
-use Kovey\Connection\ManualCollectInterface;
 
-class Redis implements RedisInterface, ManualCollectInterface
+class Redis extends Base implements RedisInterface
 {
     /**
      * @description data base
      *
      * @var ConsistencyHash
      */
-    private ConsistencyHash $hash;
-
-    /**
-     * @description db connections
-     *
-     * @var Array
-     */
-    private Array $connections;
-
-    /**
-     * @description init pool event
-     */
-    private mixed $initPool;
+    protected ConsistencyHash $hash;
 
     /**
      * @description construct
@@ -53,10 +38,6 @@ class Redis implements RedisInterface, ManualCollectInterface
         }
 
         $this->initPool = $initPool;
-        $this->hash = new ConsistencyHash(32);
-        for ($i = 0; $i < $redisCount; $i ++) {
-            $this->hash->addNode($i);
-        }
 
         $this->connections = array();
         foreach ($shardingKeys as $key) {
@@ -64,28 +45,12 @@ class Redis implements RedisInterface, ManualCollectInterface
         }
     }
 
-    /**
-     * @description add sharding key
-     *
-     * @param string | int $shardingKey
-     *
-     * @return RedisInterface
-     *
-     */
-    public function addShardingKey(string | int $shardingKey) : RedisInterface
+    protected function initAlgorithm(int $count) : void
     {
-        $partition = $this->hash->getNode($shardingKey);
-        if (isset($this->connections[$partition])) {
-            return $this;
+        $this->hash = new ConsistencyHash(32);
+        for ($i = 0; $i < $count; $i ++) {
+            $this->hash->addNode($i);
         }
-
-        $pool = call_user_func($this->initPool, $partition);
-        if (!$pool instanceof Pool) {
-            throw new \RuntimeException('pool is not instanceof Pool', 1011);
-        }
-
-        $this->connections[$partition] = $pool;
-        return $this;
     }
 
     /**
@@ -93,30 +58,13 @@ class Redis implements RedisInterface, ManualCollectInterface
      *
      * @param string | int $shardingKey
      *
-     * @return int | string
+     * @return int
      */
-    public function getShardingKey(string | int $shardingKey) : int | string
+    public function getShardingKey(string | int $shardingKey) : int
     {
         return $this->hash->getNode($shardingKey);
     }
     
-    /**
-     * @description get connection
-     *
-     * @param string | int $shardingKey
-     *
-     * @return RedisInterface
-     */
-    public function getConnection(string | int $shardingKey) : RI
-    {
-        $shardingKey = $this->hash->getNode($shardingKey);
-        if (!isset($this->connections[$shardingKey])) {
-            throw new \RuntimeException("connection of $shardingKey is not exists.", 1009);
-        }
-
-        return $this->connections[$shardingKey]->getConnection();
-    }
-
     public function __call(string $method, Array $params) : mixed
     {
         if (empty($params)) {
@@ -124,16 +72,5 @@ class Redis implements RedisInterface, ManualCollectInterface
         }
 
         return $this->getConnection($params[0])->$method(...$params);
-    }
-
-    public function collect() : void
-    {
-        foreach ($this->connections as $pool) {
-            if (!$pool instanceof ManualCollectInterface) {
-                continue;
-            }
-
-            $pool->collect();
-        }
     }
 }

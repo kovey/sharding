@@ -19,52 +19,20 @@ use Kovey\Db\Sql\BatchInsert;
 use Kovey\Db\Sql\Where;
 use Kovey\Sharding\Sharding\Database;
 use Kovey\Db\Exception\DbException;
-use Kovey\Db\DbInterface as DI;
 use Kovey\Connection\Pool;
-use Kovey\Connection\ManualCollectInterface;
 
-class Mysql implements DbInterface, ManualCollectInterface
+class Mysql extends Base implements DbInterface
 {
     /**
      * @description data base
      *
      * @var Database
      */
-    private Database $database;
+    protected Database $database;
 
-    /**
-     * @description db connections
-     *
-     * @var Array
-     */
-    private Array $connections;
-
-    /**
-     * @description init pool event
-     */
-    private mixed $initPool;
-
-    /**
-     * @description construct
-     *
-     * @param int $dbCount
-     *
-     * @param callable | Array $initPool
-     *
-     * @return Mysql
-     */
-    public function __construct(int $dbCount, callable | Array $initPool, Array $shardingKeys = array())
+    protected function initAlgorithm(int $count) : void
     {
-        if (!is_callable($initPool)) {
-            throw new DbException('initPool event is not callable', 1014);
-        }
-
-        $this->initPool = $initPool;
         $this->database = new Database($dbCount);
-        $this->connections = array();
-        foreach ($shardingKeys as $key) {
-            $this->addShardingKey($key);
-        }
     }
 
     /**
@@ -77,23 +45,6 @@ class Mysql implements DbInterface, ManualCollectInterface
     public function getShardingKey(string | int $shardingKey) : int
     {
         return $this->database->getShardingKey($shardingKey);
-    }
-
-    /**
-     * @description get connection
-     *
-     * @param string | int $shardingKey
-     *
-     * @return DbInterface
-     */
-    public function getConnection(string | int $shardingKey) : DI
-    {
-        $shardingKey = $this->database->getShardingKey($shardingKey);
-        if (!isset($this->connections[$shardingKey])) {
-            throw new DbException("connection of $shardingKey is not exists.", 1009);
-        }
-
-        return $this->connections[$shardingKey]->getConnection();
     }
 
     /**
@@ -317,44 +268,5 @@ class Mysql implements DbInterface, ManualCollectInterface
     public function exec(string $sql, string | int $shardingKey) : int
     {
         return $this->getConnection($shardingKey)->exec($sql);
-    }
-
-    /**
-     * @description add sharding key
-     *
-     * @param string | int $shardingKey
-     *
-     * @return DbInterface
-     *
-     */
-    public function addShardingKey(string | int $shardingKey) : DbInterface
-    {
-        $partition = $this->database->getShardingKey($shardingKey);
-        if (isset($this->connections[$partition])) {
-            return $this;
-        }
-
-        $pool = call_user_func($this->initPool, $partition);
-        if (!$pool instanceof Pool) {
-            throw new DbException('pool is not instanceof Pool', 1011);
-        }
-
-        $pool->traceId = $this->traceId ?? '';
-        $pool->spanId = $this->spanId ?? '';
-        $pool->initConnection();
-
-        $this->connections[$partition] = $pool;
-        return $this;
-    }
-
-    public function collect() : void
-    {
-        foreach ($this->connections as $pool) {
-            if (!$pool instanceof ManualCollectInterface) {
-                continue;
-            }
-
-            $pool->collect();
-        }
     }
 }
