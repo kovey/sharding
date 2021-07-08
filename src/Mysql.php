@@ -32,7 +32,7 @@ class Mysql extends Base implements DbInterface
 
     protected function initAlgorithm(int $count) : void
     {
-        $this->database = new Database($dbCount);
+        $this->database = new Database($count);
     }
 
     /**
