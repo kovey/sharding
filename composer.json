@@ -19,8 +19,6 @@
     ],
     "require": {
         "php": "^8.0",
-        "kovey/db": "^1.1",
-        "kovey/redis": "^1.0",
         "kovey/connection": "^1.1"
     },
     "require-dev": {

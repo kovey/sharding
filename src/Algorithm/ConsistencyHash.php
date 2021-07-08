@@ -65,7 +65,7 @@ class ConsistencyHash
     {
         $this->nodes[] = $node;
 
-        for( $i = 0; $i < $this->vNotesCount; $i ++ ){
+        for ($i = 0; $i < $this->vNotesCount; $i ++ ) {
             $vHashKey = sprintf("%u", crc32($node . $i));
             $this->vNotes[$vHashKey] = $node;
         }
@@ -82,7 +82,7 @@ class ConsistencyHash
      */
     public function addNodes(Array $nodes) : ConsistencyHash
     {
-        foreach($nodes as $node){
+        foreach ($nodes as $node) {
             $this->addNode($node);
         }
 
@@ -98,14 +98,14 @@ class ConsistencyHash
      */
     public function getNode(string | int $key) : string | int
     {
-        if (!$this->isSort ) {
+        if (!$this->isSort) {
             ksort($this->vNotes);
             $this->isSort = true;
         }
 
         $hKey = sprintf("%u", crc32($key));
 
-        foreach ($this->vNotes as $vHashKey => $node){
+        foreach ($this->vNotes as $vHashKey => $node) {
             if ($hKey < $vHashKey) {
                 return $node;
             }

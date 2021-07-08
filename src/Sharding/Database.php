@@ -40,7 +40,7 @@ class Database
     public function getShardingKey(string | int $id) : int
     {
         if (!ctype_digit(strval($id))) {
-            $id = hexdec(hash('crc32', $id));
+            $id = sprintf('%u', hash('crc32', $id));
         } else {
             $id = intval($id);
         }
