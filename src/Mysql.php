@@ -19,7 +19,6 @@ use Kovey\Db\Sql\BatchInsert;
 use Kovey\Db\Sql\Where;
 use Kovey\Sharding\Sharding\Database;
 use Kovey\Db\Exception\DbException;
-use Kovey\Connection\Pool;
 
 class Mysql extends Base implements DbInterface
 {

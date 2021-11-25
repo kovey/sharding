@@ -79,8 +79,8 @@ abstract class Base implements ManualCollectInterface, TraceInterface
             throw new \RuntimeException('pool is not instanceof Pool', 1011);
         }
 
-        $pool->traceId = $this->traceId ?? '';
-        $pool->spanId = $this->spanId ?? '';
+        $pool->setTraceId($this->traceId);
+        $pool->setSpanId($this->spanId);
         $pool->initConnection();
 
         $this->connections[$partition] = $pool;
