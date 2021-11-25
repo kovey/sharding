@@ -38,8 +38,6 @@ interface RedisInterface
      *
      * @param string | int $shardingKey
      *
-     * @return DbInterface
-     *
      */
-    public function addShardingKey(string | int $shardingKey) : RedisInterface;
+    public function addShardingKey(string | int $shardingKey) : void;
 }

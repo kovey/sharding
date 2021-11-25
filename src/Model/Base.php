@@ -17,6 +17,7 @@ use Kovey\Db\Sql\Delete;
 use Kovey\Db\Sql\BatchInsert;
 use Kovey\Db\Sql\Where;
 use Kovey\Db\Exception\DbException;
+use Kovey\Sharding\DbInterface;
 
 abstract class Base
 {
@@ -26,6 +27,13 @@ abstract class Base
      * @var string
      */
     protected string $tableName = '';
+
+    /**
+     * @description database
+     *
+     * @var string
+     */
+    protected DbInterface $database;
 
     /**
      * @description insert data

@@ -19,10 +19,12 @@
     ],
     "require": {
         "php": "^8.0",
-        "kovey/connection": "^1.1"
+        "kovey/connection": "^1.1",
+        "kovey/library": "^2.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.3"
+        "phpunit/phpunit": "^9.3",
+        "phpstan/phpstan": "^1.2"
     },
     "autoload": {
         "psr-4": {

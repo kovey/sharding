@@ -40,18 +40,18 @@ class ConsistencyHash
      *
      * @var int
      */
-    protected int $vNotesCount;
+    protected int $vNodesCount;
 
     /**
      * @description construct
      *
-     * @param int $vNotesCount
+     * @param int $vNodesCount
      *
      * @return ConsistencyHash
      */
-    public function __construct(int $vNotesCount = 10)
+    public function __construct(int $vNodesCount = 10)
     {
-        $this->vNotesCount = $vNotesCount;
+        $this->vNodesCount = $vNodesCount;
     }
 
     /**
@@ -65,9 +65,9 @@ class ConsistencyHash
     {
         $this->nodes[] = $node;
 
-        for ($i = 0; $i < $this->vNotesCount; $i ++ ) {
+        for ($i = 0; $i < $this->vNodesCount; $i ++ ) {
             $vHashKey = sprintf("%u", crc32($node . $i));
-            $this->vNotes[$vHashKey] = $node;
+            $this->vNodes[$vHashKey] = $node;
         }
 
         return $this;
@@ -99,13 +99,13 @@ class ConsistencyHash
     public function getNode(string | int $key) : string | int
     {
         if (!$this->isSort) {
-            ksort($this->vNotes);
+            ksort($this->vNodes);
             $this->isSort = true;
         }
 
         $hKey = sprintf("%u", crc32($key));
 
-        foreach ($this->vNotes as $vHashKey => $node) {
+        foreach ($this->vNodes as $vHashKey => $node) {
             if ($hKey < $vHashKey) {
                 return $node;
             }

@@ -15,8 +15,9 @@ use Kovey\Connection\ManualCollectInterface;
 use Kovey\Connection\Pool;
 use Kovey\Redis\RedisInterface;
 use Kovey\Db\DbInterface;
+use Kovey\Library\Trace\TraceInterface;
 
-abstract class Base implements ManualCollectInterface
+abstract class Base implements ManualCollectInterface, TraceInterface
 {
     /**
      * @description db connections
@@ -30,6 +31,10 @@ abstract class Base implements ManualCollectInterface
      */
     protected mixed $initPool;
 
+    protected string $traceId;
+
+    protected string $spanId;
+
     /**
      * @description construct
      *
@@ -42,7 +47,7 @@ abstract class Base implements ManualCollectInterface
     public function __construct(int $count, callable | Array $initPool, Array $shardingKeys = array())
     {
         if (!is_callable($initPool)) {
-            throw \RuntimeException('initPool event is not callable', 1014);
+            throw new \RuntimeException('initPool event is not callable', 1014);
         }
 
         $this->initPool = $initPool;
@@ -62,11 +67,11 @@ abstract class Base implements ManualCollectInterface
      * @return RedisInterface
      *
      */
-    public function addShardingKey(string | int $shardingKey) : RedisInterface
+    public function addShardingKey(string | int $shardingKey) : void
     {
         $partition = $this->getShardingKey($shardingKey);
         if (isset($this->connections[$partition])) {
-            return $this;
+            return;
         }
 
         $pool = call_user_func($this->initPool, $partition);
@@ -79,7 +84,6 @@ abstract class Base implements ManualCollectInterface
         $pool->initConnection();
 
         $this->connections[$partition] = $pool;
-        return $this;
     }
 
     /**
@@ -108,6 +112,26 @@ abstract class Base implements ManualCollectInterface
 
             $pool->collect();
         }
+    }
+
+    public function setTraceId(string $traceId) : void
+    {
+        $this->traceId = $traceId;
+    }
+
+    public function setSpanId(string $spanId) : void
+    {
+        $this->spanId = $spanId;
+    }
+
+    public function getTraceId() : string
+    {
+        return $this->traceId;
+    }
+
+    public function getSpanId() : string
+    {
+        return $this->spanId;
     }
 
     abstract public function getShardingKey(string | int $shardingKey) : int;

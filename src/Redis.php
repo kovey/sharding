@@ -34,7 +34,7 @@ class Redis extends Base implements RedisInterface
     public function __construct(int $redisCount, callable | Array $initPool, Array $shardingKeys = array())
     {
         if (!is_callable($initPool)) {
-            throw \RuntimeException('initPool event is not callable', 1014);
+            throw new \RuntimeException('initPool event is not callable', 1014);
         }
 
         $this->initPool = $initPool;

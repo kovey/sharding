@@ -186,8 +186,6 @@ interface DbInterface
      *
      * @param string | int $shardingKey
      *
-     * @return DbInterface
-     *
      */
-    public function addShardingKey(string | int $shardingKey) : DbInterface;
+    public function addShardingKey(string | int $shardingKey) : void;
 }
